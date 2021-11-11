@@ -2,10 +2,12 @@ package com.fms.smartaudiosystem.model.mqtt;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import lombok.Data;
 
 /**
  * Class for storing and validating MQTT messages
  */
+@Data
 public class MqttPublishModel {
 
     @NotNull
@@ -21,37 +23,4 @@ public class MqttPublishModel {
 
     @NotNull
     private Integer qos;
-
-
-    public String getTopic() {
-        return topic;
-    }
-
-    public void setTopic(String topic) {
-        this.topic = topic;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public Boolean getRetained() {
-        return retained;
-    }
-
-    public void setRetained(Boolean retained) {
-        this.retained = retained;
-    }
-
-    public Integer getQos() {
-        return qos;
-    }
-
-    public void setQos(Integer qos) {
-        this.qos = qos;
-    }
 }
