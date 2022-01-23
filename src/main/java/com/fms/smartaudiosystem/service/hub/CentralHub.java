@@ -1,32 +1,54 @@
-package com.fms.smartaudiosystem.hub;
+package com.fms.smartaudiosystem.service.hub;
 
 import static com.fms.smartaudiosystem.Application.log;
 import static com.fms.smartaudiosystem.utils.Constants.MQTT_SERVER_ADDRES;
 import static com.fms.smartaudiosystem.utils.Constants.TEST_TOPIC;
 
+import com.fms.smartaudiosystem.model.mqtt.MqttPublishModel;
 import com.fms.smartaudiosystem.mqtt.MqttClient;
+import java.util.ArrayList;
+import java.util.List;
 import javax.validation.constraints.NotNull;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
-public class ChildHub implements MqttCallback {
+public class CentralHub implements MqttCallback {
 
-    private final Integer id;
-
-    private String MQTT_PUBLISHER_ID = "child-hub-";
+    private static final String MQTT_PUBLISHER_ID = "central-hub";
 
     @NotNull
-    private static MqttClient mqttClient;
+    private final MqttClient mqttClient;
 
-    public ChildHub(Integer id) {
-        log.info(String.format("Initializing child hub %d...", id));
-        this.id = id;
-        this.MQTT_PUBLISHER_ID += id.toString();
+    private final List<ChildHub> childHubList;
 
+    private CentralHub() {
+        log.info("Initializing central hub...");
         mqttClient = new MqttClient(MQTT_SERVER_ADDRES, MQTT_PUBLISHER_ID);
         mqttClient.setCallback(this);
-        mqttClient.subscribe(TEST_TOPIC);
+
+        childHubList = new ArrayList<>();
+        spawnChildHubs();
+    }
+
+    private static class SingletonHolder {
+
+        private static final CentralHub INSTANCE = new CentralHub();
+    }
+
+    public static CentralHub getInstance() {
+        return SingletonHolder.INSTANCE;
+    }
+
+    public void spawnChildHubs() {
+        log.info("Spawning child hubs...");
+
+        for (int i = 0; i < 5; ++i)
+            childHubList.add(new ChildHub(i));
+    }
+
+    public void publishMessage(MqttPublishModel message) {
+        mqttClient.publishMessage(message);
     }
 
     @Override
@@ -43,9 +65,5 @@ public class ChildHub implements MqttCallback {
     @Override
     public void deliveryComplete(IMqttDeliveryToken token) {
 
-    }
-
-    public Integer getId() {
-        return id;
     }
 }

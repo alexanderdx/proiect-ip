@@ -1,8 +1,7 @@
 package com.fms.smartaudiosystem;
 
-import com.fms.smartaudiosystem.hub.CentralHub;
+import com.fms.smartaudiosystem.service.hub.CentralHub;
 import com.fms.smartaudiosystem.model.mqtt.MqttPublishModel;
-import com.fms.smartaudiosystem.mqtt.MqttClient;
 import com.fms.smartaudiosystem.utils.Constants;
 
 import org.slf4j.Logger;

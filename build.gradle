@@ -25,9 +25,9 @@ dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	implementation 'org.springframework.integration:spring-integration-mqtt:5.5.5'
-	implementation 'javax.validation:validation-api:2.0.1.Final'
-	implementation 'org.springframework.boot:spring-boot-starter-validation:2.5.6'
+	implementation 'org.springframework.integration:spring-integration-mqtt'
+	implementation 'javax.validation:validation-api'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 }
 
 test {
