@@ -152,4 +152,8 @@ cython_debug/
 #.idea/
 
 .DS_Store
+
+### VS Code ###
+.vscode/
+
 data.db
