@@ -4,29 +4,72 @@ import time, vlc, pafy
 from youtubesearchpython import VideosSearch
  
 
-vlc_instance = vlc.Instance ()
-player       = vlc_instance.media_player_new()
-
-def play_video (url, new_player = True):
-    best  = pafy.new(url).getbest()
-    media = vlc_instance.media_new(best.url)
-     
-    player.set_media(media)
-    player.play()
+class media_player:
+    def __init__ (self):
+        self.vlc_instance = vlc.Instance ()
+        self.player       = self.vlc_instance.media_player_new ()
+        self.volume       = 100
 
 
-def youtube_search (query):
-    videosSearch = VideosSearch(query, limit = 1)
+    def set_media (self, source, is_youtube = True):
+        if is_youtube:
+            best  = pafy.new (source).getbest ()
+            media = self.vlc_instance.media_new (best.url)
+            
+            self.player.set_media(media)
+            self.player.play()
 
-    return videosSearch.result()['result'][0]['link']
 
+    def search (self, query):
+        videosSearch = VideosSearch (query, limit = 1)
 
-def main ():
-    while True:
-        print ('Search: ', end = '')
-        query = input ()
-        play_video (youtube_search (query), new_player = True if player.is_playing else False)
+        return videosSearch.result()['result'][0]['link']
+
+    
+    def pause (self):
+        self.player.pause ()
+
+    
+    def play (self):
+        self.player.play ()
+
+    def volume_up (self):
+        self.volume += 10
+        self.player.audio_set_volume (self.volume)
+
+    def volume_down (self):
+        self.volume -= 10
+        self.player.audio_set_volume (self.volume)
+
+    def volume_absolute (self, volume):
+        self.player.audio_set_volume (volume)
+
+    def mute (self):
+        self.player.audio_set_volume (0)
+
+    def unmute (self):
+        self.player.audio_set_volume (self.volume)
+
 
 
 if __name__ == '__main__':
-    main ()
+    mp = media_player ()
+    
+    while True:
+        print ('Search: ', end = '')
+        query = input ()
+
+        if query == "play":
+            mp.play ()
+        elif query == "pause":
+            mp.pause ()
+        elif query == "vup":
+            mp.volume_up ()
+        elif query == "vdown":
+            mp.volume_down ()
+        elif query == "mute":
+            mp.mute ()
+        elif query == "unmute":
+            mp.unmute ()
+        else:
+            mp.set_media (mp.search (query))
