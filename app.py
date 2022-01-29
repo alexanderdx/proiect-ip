@@ -1,6 +1,7 @@
-from flask import request
+from flask import request, Flask
 from model import *
 
+import media_controller
 
 @app.route('/')
 def hello():
