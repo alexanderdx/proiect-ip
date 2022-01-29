@@ -16,12 +16,11 @@
 ## Installation
 
 ### Using virtualenv
-```python -m pip install virtualenv```
 
-```python -m venv venv```
-
-```.\venv\Scripts\activate```
-
-```pip install -r requirements.txt```
-
-```flask run```
+```cmd
+python -m pip install virtualenv
+python -m venv venv
+.\venv\Scripts\activate
+pip install -r requirements.txt
+flask run
+```
