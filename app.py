@@ -1,22 +1,5 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask import request
-
-app = Flask(__name__)
-
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Supress flask warning
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
-
-db = SQLAlchemy(app)
-
-
-class Hub(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), unique=True, nullable=False)
-    user_number = db.Column(db.Integer)
-
-    def __repr__(self):
-        return f'{self.id}, {self.name}, {self.user_number}'
+from model import *
 
 
 @app.route('/')
@@ -43,8 +26,7 @@ def get_hub_by_id(id):
 
 @app.route('/hubs', methods=['POST'])
 def add_hub():
-    hub = Hub(id=request.json['id'], name=request.json['name'],
-              user_number=request.json['user_number'])
+    hub = Hub(name=request.json['name'], user_number=request.json['user_number'])
     db.session.add(hub)
     db.session.commit()
     return {'id': hub.id, 'name': hub.name}
