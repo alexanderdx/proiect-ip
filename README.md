@@ -24,3 +24,7 @@ python -m venv venv
 pip install -r requirements.txt
 flask run
 ```
+
+## For devs
+
+Use ```pip freeze > requirements.txt``` to update the app's dependency list upon adding new packages.
