@@ -1,9 +1,11 @@
 from flask import request
 from model import *
 
+
 @app.route('/')
 def hello():
     return 'Hello'
+
 
 @app.route('/hubs')
 def get_hubs():
@@ -15,10 +17,12 @@ def get_hubs():
 
     return {'hubs': output}
 
+
 @app.route('/hubs/<id>')
 def get_hub_by_id(id):
     hub = Hub.query.get_or_404(id)
     return {'id': hub.id, 'name': hub.name}
+
 
 @app.route('/hubs', methods=['POST'])
 def add_hub():
@@ -26,6 +30,7 @@ def add_hub():
     db.session.add(hub)
     db.session.commit()
     return {'id': hub.id, 'name': hub.name}
+
 
 @app.route('/hubs/<id>', methods=['DELETE'])
 def delete_hub(id):
