@@ -1,7 +1,10 @@
-from flask import request, Flask
-from model import *
+from flask import request
 
-@app.route('/users')
+from app import app
+from app import db
+from models import User
+
+@app.route('/user')
 def get_users():
     users = User.query.all()
     output_users = []
@@ -13,8 +16,7 @@ def get_users():
 
 @app.route('/user', methods=['POST'])
 def add_user():
-    user = User(
-        name=request.json['name'], output=request.json['output'], room=request.json['room'])
+    user = User(name=request.json['name'], output=request.json['output'], room=request.json['room'])
     db.session.add(user)
     db.session.commit()
     return {'id': user.id, 'name': user.name, 'room': user.room}
@@ -26,11 +28,9 @@ def update_user(id):
     action = request_data['action']
 
     if action == 'change_room':
-        room = request_data['room']
-        user.room = room
+        user.room = request_data['room']
     elif action == 'change_output':
-        output = request_data['output']
-        user.output = output
+        user.output = request_data['output']
 
     db.session.commit()
     return {'id': user.id, 'name': user.name,'output': user.output, 'room': user.room}
