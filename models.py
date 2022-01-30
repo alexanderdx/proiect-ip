@@ -1,13 +1,5 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+from app import db
 from sqlalchemy.orm import backref
-
-app = Flask(__name__)
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Supress flask warning
-db = SQLAlchemy(app)
-
 
 class Hub(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -31,6 +23,5 @@ class MiniHub(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String(50))
     connected_user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    connected_user = db.relationship(
-        "User", backref=backref('users', uselist=False))
+    connected_user = db.relationship("User", backref=backref('users', uselist=False))
     volume = db.Column(db.Integer)

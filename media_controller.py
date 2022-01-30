@@ -1,4 +1,4 @@
-import sys, json
+import json
 from flask import request
 from app import app
 from classes.media_player import media_player
