@@ -13,3 +13,4 @@ db.create_all()
 import hub_controller
 import user_controller
 import media_controller
+import minihub_controller
