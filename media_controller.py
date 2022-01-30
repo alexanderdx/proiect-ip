@@ -3,46 +3,47 @@ from flask import request
 from app import app
 from classes.media_player import media_player
 
-mp = None
+media_players = dict ()
 
-@app.route ('/media_player', methods = ['POST'])
-def create ():
-    global mp 
 
-    mp = media_player ()
+@app.route ('/media_player/<id>', methods = ['POST'])
+def create (id):
+    global media_players
+
+    media_players[id] = media_player ()
     return json.dumps ({'message': 'player created'})
 
 
-@app.route ('/media_player', methods = ['PATCH'])
-def update ():
-    global mp 
+@app.route ('/media_player/<id>', methods = ['PATCH'])
+def update (id):
+    global media_players
     
     request_data = request.get_json ()
     command      = request_data['command']
     if command == 'set_media':
         query = request_data['query']
-        mp.set_media (mp.search (str(query)))
+        media_players[id].set_media (media_players[id].search (str(query)))
     elif command == 'play':
-        mp.play ()
+        media_players[id].play ()
     elif command == 'pause':
-        mp.pause ()
+        media_players[id].pause ()
     elif command == 'mute':
-        mp.mute ()
+        media_players[id].mute ()
     elif command == 'unmute':
-        mp.unmute ()
+        media_players[id].unmute ()
     elif command == 'vup':
-        mp.volume_up ()
+        media_players[id].volume_up ()
     elif command == 'vdown':
-        mp.volume_down ()
+        media_players[id].volume_down ()
     else:
         return json.dumps ({'message': 'wrong command'})
     return json.dumps ({'message': 'command sent'})
 
 
-@app.route ('/media_player', methods = ['DELETE'])
-def destroy ():
-    global mp 
+@app.route ('/media_player/<id>', methods = ['DELETE'])
+def destroy (id):
+    global media_players
     
-    mp.close ()
-    mp = None
+    media_players[id].close ()
+    media_players[id] = None
     return json.dumps ({'message': 'player destroyed'})
