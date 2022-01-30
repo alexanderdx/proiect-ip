@@ -10,7 +10,12 @@ media_players = dict ()
 def create (id):
     global media_players
 
-    media_players[id] = media_player ()
+    title = None
+    if request.data:
+        request_data = request.get_json ()
+        title        = request_data['title']
+        
+    media_players[id] = media_player (title)
     return json.dumps ({'message': 'player created'})
 
 

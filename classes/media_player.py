@@ -3,8 +3,14 @@ from youtubesearchpython import VideosSearch
  
 
 class media_player:
-    def __init__ (self):
-        self.vlc_instance = vlc.Instance ()
+    def __init__ (self, title = None):
+
+        options = ' '
+        if title is not None:
+            title   = title.replace (' ', '_')
+            options = f'--video-title {title}'
+
+        self.vlc_instance = vlc.Instance (options)
         self.player       = self.vlc_instance.media_player_new ()
         self.volume       = 100
 
