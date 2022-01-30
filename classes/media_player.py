@@ -50,3 +50,9 @@ class media_player:
 
     def close (self):
         self.player.stop ()
+
+    def get_time (self):
+        return self.player.get_time ()
+
+    def set_time (self, time):
+        self.player.set_time (time) 

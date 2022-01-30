@@ -35,9 +35,12 @@ def update (id):
         media_players[id].volume_up ()
     elif command == 'vdown':
         media_players[id].volume_down ()
+    elif command == 'set_time':
+        time = request_data ['time']
+        media_players[id].set_time (int (time))
     else:
         return json.dumps ({'message': 'wrong command'})
-    return json.dumps ({'message': 'command sent'})
+    return json.dumps ({'message': 'command executed succesfully'})
 
 
 @app.route ('/media_player/<id>', methods = ['DELETE'])
@@ -47,3 +50,15 @@ def destroy (id):
     media_players[id].close ()
     media_players[id] = None
     return json.dumps ({'message': 'player destroyed'})
+
+
+@app.route ('/media_player/<id>', methods = ['GET'])
+def index (id):
+    global media_players
+    
+    request_data = request.get_json ()
+    command      = request_data['command']
+    if command == 'get_time':
+        return json.dumps ({'time': media_players[id].get_time ()})
+    else:
+        return json.dumps ({'message': 'wrong command'})
