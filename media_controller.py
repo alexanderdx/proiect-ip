@@ -1,40 +1,48 @@
-import sys
+import sys, json
+from flask import request
 from app import app
-
 from classes.media_player import media_player
-mp = media_player ()
 
-@app.route("/controlls/play/<query>")
-def set_media (query):
-    mp.set_media (mp.search (str(query)))
-    return 'Command sent'
+mp = None
 
-@app.route("/controlls/play")
-def play ():
-    mp.play ()
-    return 'Command sent'
+@app.route ('/media_player', methods = ['POST'])
+def create ():
+    global mp 
 
-@app.route("/controlls/pause")
-def pause ():
-    mp.pause ()
-    return 'Command sent'
+    mp = media_player ()
+    return json.dumps ({'message': 'player created'})
 
-@app.route("/controlls/mute")
-def mute ():
-    mp.mute ()
-    return 'Command sent'
 
-@app.route("/controlls/unmute")
-def unmute ():
-    mp.unmute ()
-    return 'Command sent'
+@app.route ('/media_player', methods = ['PATCH'])
+def update ():
+    global mp 
+    
+    request_data = request.get_json ()
+    command      = request_data['command']
+    if command == 'set_media':
+        query = request_data['query']
+        mp.set_media (mp.search (str(query)))
+    elif command == 'play':
+        mp.play ()
+    elif command == 'pause':
+        mp.pause ()
+    elif command == 'mute':
+        mp.mute ()
+    elif command == 'unmute':
+        mp.unmute ()
+    elif command == 'vup':
+        mp.volume_up ()
+    elif command == 'vdown':
+        mp.volume_down ()
+    else:
+        return json.dumps ({'message': 'wrong command'})
+    return json.dumps ({'message': 'command sent'})
 
-@app.route("/controlls/vup")
-def volume_up ():
-    mp.volume_up ()
-    return 'Command sent'
 
-@app.route("/controlls/vdown")
-def volume_down ():
-    mp.volume_down ()
-    return 'Command sent'
+@app.route ('/media_player', methods = ['DELETE'])
+def destroy ():
+    global mp 
+    
+    mp.close ()
+    mp = None
+    return json.dumps ({'message': 'player destroyed'})

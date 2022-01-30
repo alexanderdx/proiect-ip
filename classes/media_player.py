@@ -48,25 +48,5 @@ class media_player:
     def unmute (self):
         self.player.audio_set_volume (self.volume)
 
-
-# if __name__ == '__main__':
-#     mp = media_player ()
-    
-#     while True:
-#         print ('Search: ', end = '')
-#         query = input ()
-
-#         if query == "play":
-#             mp.play ()
-#         elif query == "pause":
-#             mp.pause ()
-#         elif query == "vup":
-#             mp.volume_up ()
-#         elif query == "vdown":
-#             mp.volume_down ()
-#         elif query == "mute":
-#             mp.mute ()
-#         elif query == "unmute":
-#             mp.unmute ()
-#         else:
-#             mp.set_media (mp.search (query))
+    def close (self):
+        self.player.stop ()
