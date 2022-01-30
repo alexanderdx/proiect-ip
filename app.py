@@ -1,7 +1,9 @@
 from flask import request, Flask
 from model import *
+import user_controller
 
 import media_controller
+
 
 @app.route('/')
 def hello():
@@ -27,7 +29,8 @@ def get_hub_by_id(id):
 
 @app.route('/hubs', methods=['POST'])
 def add_hub():
-    hub = Hub(name=request.json['name'], user_number=request.json['user_number'])
+    hub = Hub(name=request.json['name'],
+              user_number=request.json['user_number'])
     db.session.add(hub)
     db.session.commit()
     return {'id': hub.id, 'name': hub.name}
