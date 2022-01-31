@@ -1,11 +1,15 @@
 import json
-from flask import request
 
-from app import app
+from flask import request
+from flask import Blueprint
+
 from app import db
 from models import Hub
 
-@app.route('/hub')
+bp = Blueprint('hub', __name__)
+
+
+@bp.route('/hub', methods=['GET'])
 def get_hubs():
     hubs = Hub.query.all()
     output = []
@@ -16,13 +20,13 @@ def get_hubs():
     return {'hubs': output}
 
 
-@app.route('/hub/<id>')
+@bp.route('/hub/<id>', methods=['GET'])
 def get_hub_by_id(id):
     hub = Hub.query.get_or_404(id)
     return {'id': hub.id, 'name': hub.name, 'user_number': hub.user_number}
 
 
-@app.route('/hub', methods=['POST'])
+@bp.route('/hub', methods=['POST'])
 def add_hub():
     hub = Hub(name=request.json['name'],
               user_number=request.json['user_number'])
@@ -30,7 +34,8 @@ def add_hub():
     db.session.commit()
     return {'id': hub.id, 'name': hub.name, 'user_number': hub.user_number}
 
-@app.route('/hub/<id>', methods=['PATCH'])
+
+@bp.route('/hub/<id>', methods=['PATCH'])
 def update_hub(id):
     hub = Hub.query.get_or_404(id)
     request_data = request.get_json()
@@ -41,13 +46,13 @@ def update_hub(id):
     elif action == 'update_connected_user':
         hub.user_number = request_data['user_number']
     else:
-        return json.dumps ({'message': 'Invalid command'})
+        return json.dumps({'message': 'Invalid command'})
 
     db.session.commit()
     return {'id': hub.id, 'name': hub.name, 'user_number': hub.user_number}
 
-        
-@app.route('/hub/<id>', methods=['DELETE'])
+
+@bp.route('/hub/<id>', methods=['DELETE'])
 def delete_hub(id):
     hub = Hub.query.get_or_404(id)
     if hub is None:

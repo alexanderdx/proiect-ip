@@ -31,3 +31,7 @@ flask run
 ## For devs
 
 Use ```pip freeze > requirements.txt``` to update the app's dependency list upon adding new packages.
+
+## Run tests
+
+```python -m pytest test/```
