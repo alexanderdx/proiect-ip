@@ -15,7 +15,10 @@
 
 ## Installation
 
-### Using virtualenv
+### Install VLC
+Our audio system integrates with the VLC player to allow for media control. You can download it [here](https://www.videolan.org/vlc/).
+
+### Create local Python environment
 
 ```cmd
 python -m pip install virtualenv
