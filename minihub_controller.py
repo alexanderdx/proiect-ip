@@ -42,6 +42,8 @@ def update_minihub(id):
         minihub.volume = request_data['volume']
     elif action == 'change_connected_user':
         minihub.connected_user_id = request_data['connected_user_id']
+    else:
+        return json.dumps ({'message': 'invalid command'})
 
     db.session.commit()
     return {'id': minihub.id, 'description': minihub.description, 'connected_user_id': minihub.connected_user_id, 'volume': minihub.volume}

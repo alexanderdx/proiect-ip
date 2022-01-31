@@ -1,3 +1,5 @@
+import json
+
 from flask import request
 from flask import Blueprint
 
@@ -38,6 +40,8 @@ def update_user(id):
         user.room = request_data['room']
     elif action == 'change_output':
         user.output = request_data['output']
+    else:
+        return json.dumps ({'message': 'invalid command'})
 
     db.session.commit()
     return {'id': user.id, 'name': user.name, 'output': user.output, 'room': user.room}
