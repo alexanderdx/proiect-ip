@@ -1,9 +1,11 @@
 import json
+import os
+import subprocess
 
 from flask import request
 from flask import Blueprint
 
-from app import db
+from app import db, app
 from models import MiniHub
 
 bp = Blueprint('minihub', __name__)
@@ -24,7 +26,14 @@ def get_minihubs():
 @bp.route('/minihub', methods=['POST'])
 def add_minihub():
     minihub = MiniHub(description=request.json['description'],
-                      connected_user_id=request.json['connected_user_id'], volume=request.json['volume'])
+                      connected_user_id=request.json['connected_user_id'], volume=request.json['volume'],
+                      port=request.json['port'])
+
+    os.system (f"echo Starting minihub on {app.config['MINIHUBS_NETWORK']}:{minihub.port}")
+    os.system (f"cd minihub_server && flask run --port={minihub.port} &")
+    result = subprocess.run(['echo', '$!'], stdout=subprocess.PIPE)
+    minihub.pid = result.stdout
+
     db.session.add(minihub)
     db.session.commit()
     return {'id': minihub.id, 'description': minihub.description, 'connected_user_id': minihub.connected_user_id, 'volume': minihub.volume}
@@ -54,6 +63,9 @@ def delete_minihub(id):
     minihub = MiniHub.query.get_or_404(id)
     if minihub is None:
         return {"error": "MiniHub not found."}
+
+    os.system (f"echo Killing minihub on {app.config['MINIHUBS_NETWORK']}:{minihub.port}")
+    os.system (f"kill {minihub.pid} &")
 
     db.session.delete(minihub)
     db.session.commit()
