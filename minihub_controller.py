@@ -42,16 +42,16 @@ def update_minihub(id):
         try:
             volume = int(request_data['volume'])
             if volume < 0 or volume > 100:
-                return json.dumps({'message': 'Invalid volume specified!'})
+                return json.dumps({'message': 'Invalid volume specified!'}), 403
         except ValueError:
-            return json.dumps({'message': 'Invalid volume specified!'})
+            return json.dumps({'message': 'Invalid volume specified!'}), 403
 
         minihub.volume = request_data['volume']
     elif action == 'change_connected_user':
         user = User.query.get(minihub.connected_user_id)
 
         if user is None:
-            return json.dumps({'message': 'User does not exist!'})
+            return json.dumps({'message': 'User does not exist!'}), 404
 
         minihub.connected_user_id = request_data['connected_user_id']
         minihub.connected_user = user
@@ -62,7 +62,7 @@ def update_minihub(id):
         minihub.connected_user_id = None
         minihub.connected_user = None
     else:
-        return json.dumps({'message': 'invalid command'})
+        return json.dumps({'message': 'Invalid command'}), 403
 
     db.session.commit()
     return {'id': minihub.id,
@@ -74,9 +74,9 @@ def update_minihub(id):
 
 @bp.route('/minihub/<id>', methods=['DELETE'])
 def delete_minihub(id):
-    minihub = MiniHub.query.get_or_404(id)
+    minihub = MiniHub.query.get(id)
     if minihub is None:
-        return {"error": "MiniHub not found."}
+        return {"error": "MiniHub not found."}, 404
 
     db.session.delete(minihub)
     db.session.commit()
