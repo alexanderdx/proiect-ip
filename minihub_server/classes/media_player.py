@@ -22,6 +22,10 @@ class media_player:
             
             self.player.set_media(media)
             self.player.play()
+        else:
+            media = self.vlc_instance.media_new(source)
+            self.player.set_media(media)
+            self.player.play()
 
 
     def search (self, query):

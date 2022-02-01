@@ -25,3 +25,5 @@ class MiniHub(db.Model):
     connected_user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     connected_user = db.relationship("User", backref=backref('users', uselist=False))
     volume = db.Column(db.Integer)
+    port = db.Column(db.Integer)
+    pid = db.Column(db.Integer)
