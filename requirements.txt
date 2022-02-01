@@ -30,11 +30,13 @@ pyparsing==3.0.7
 pytest==6.2.5
 python-dotenv==0.19.2
 python-vlc==3.0.12118
+requests==2.27.1
 rfc3986==1.5.0
 six==1.16.0
 sniffio==1.2.0
 SQLAlchemy==1.4.31
 toml==0.10.2
+urllib3==1.26.8
 Werkzeug==2.0.2
 youtube-dl==2021.12.17
 youtube-search-python==1.6.1
