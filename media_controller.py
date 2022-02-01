@@ -1,12 +1,16 @@
 import json
+
 from flask import request
-from app import app
+from flask import Blueprint
+
 from classes.media_player import media_player
+
+bp = Blueprint('media_player', __name__)
 
 media_players = dict ()
 
 
-@app.route ('/media_player/<id>', methods = ['POST'])
+@bp.route('/media_player/<id>', methods=['POST'])
 def create (id):
     global media_players
 
@@ -19,7 +23,7 @@ def create (id):
     return json.dumps ({'message': 'player created'})
 
 
-@app.route ('/media_player/<id>', methods = ['PATCH'])
+@bp.route('/media_player/<id>', methods=['PATCH'])
 def update (id):
     global media_players
     
@@ -48,7 +52,7 @@ def update (id):
     return json.dumps ({'message': 'command executed succesfully'})
 
 
-@app.route ('/media_player/<id>', methods = ['DELETE'])
+@bp.route('/media_player/<id>', methods=['DELETE'])
 def destroy (id):
     global media_players
     
@@ -57,7 +61,7 @@ def destroy (id):
     return json.dumps ({'message': 'player destroyed'})
 
 
-@app.route ('/media_player/<id>', methods = ['GET'])
+@bp.route('/media_player/id', methods=['GET'])
 def index (id):
     global media_players
     
