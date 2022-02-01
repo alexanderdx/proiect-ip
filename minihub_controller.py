@@ -1,6 +1,8 @@
 import json
 import os
 import subprocess
+import time
+import requests
 
 from flask import request
 from flask import Blueprint
@@ -33,6 +35,13 @@ def add_minihub():
     os.system (f"cd minihub_server && flask run --port={minihub.port} &")
     result = subprocess.run(['echo', '$!'], stdout=subprocess.PIPE)
     minihub.pid = result.stdout
+
+    time.sleep (3)
+
+    url = f"http://{app.config['MINIHUBS_NETWORK']}:{minihub.port}/media_player"
+    payload = json.dumps ({'title': minihub.description})
+    headers = {"Content-Type": "application/json"}
+    response = requests.post(url, data = payload, headers = headers)
 
     db.session.add(minihub)
     db.session.commit()
