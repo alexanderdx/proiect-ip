@@ -34,7 +34,10 @@ def add_user():
 
 @bp.route('/user/<id>', methods=['PATCH'])
 def update_user(id):
-    user = User.query.get_or_404(id)
+    user = User.query.get(id)
+    if user is None:
+        return {"error": "User not found."}, 404
+        
     request_data = request.get_json()
     action = request_data['action']
 
