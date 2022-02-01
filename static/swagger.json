@@ -1,251 +1,449 @@
 {
-    "openapi": "3.0.0",
-    "info": {
-      "description": "Jucatorii de la 344",
-      "version": "1.0.0",
-      "title": "Full Motion Sound (+9) API",
-      "license": {
-        "name": "MIT",
-        "url": "https://opensource.org/licenses/MIT"
-      }
-    },
-    "tags": [
-      {
-        "name": "Smart Sound System API",
-        "description": "This bit needs work: An API made to simulate a smart sound system ment to be used in homes with multiple rooms."
-      }
-    ],
-    "servers": [
-      {
-        "url": "/"
-      }
-    ],
-    "paths": {
-      "/minihub": {
-        "get": {
-          "tags": [
-            "Mini Hubs"
-          ],
-          "summary": "Returns a list of all connected MiniHubs",
-          "responses": {
-            "200": {
-              "description": "OK",
-              "schema": {
-                "$ref": "#/components/schemas/minihubsRequest"
-              }
-            }
-          }
-        },
-        "post": {
-          "tags": [
-            "Mini Hubs"
-          ],
-          "summary": "Create a new MiniHub",
-          "requestBody": {
-            "description": "Mini Hub Post Object",
-            "required": true,
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/minihubRequestPostBody"
-                }
-              }
-            }
-          },
-          "produces": [
-            "application/json"
-          ],
-          "responses": {
-            "201": {
-              "description": "OK",
-              "schema": {
-                "$ref": "#/components/schemas/id"
-              }
-            },
-            "400": {
-              "description": "Failed. Bad post data."
+  "openapi": "3.0.0",
+  "info": {
+    "description": "Jucatorii de la 344",
+    "version": "1.0.0",
+    "title": "Full Motion Sound (+9) API",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "tags": [
+    {
+      "name": "Smart Sound System API",
+      "description": "This bit needs work: An API made to simulate a smart sound system ment to be used in homes with multiple rooms."
+    }
+  ],
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "paths": {
+    "/minihub": {
+      "get": {
+        "tags": [
+          "Mini Hubs"
+        ],
+        "summary": "Returns a list of all connected MiniHubs",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/components/schemas/minihubsRequest"
             }
           }
         }
       },
-      "/minihub/{id}": {
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "MiniHub ID",
-            "type": "string"
-          }
+      "post": {
+        "tags": [
+          "Mini Hubs"
         ],
-        "get": {
-          "tags": [
-            "Mini Hubs"
-          ],
-          "summary": "Get Mini Hub request with given ID",
-          "parameters": [
-            {
-              "in": "path",
-              "name": "id",
-              "required": true,
-              "description": "Mini Hub ID",
+        "summary": "Create a new MiniHub",
+        "requestBody": {
+          "description": "Mini Hub Post Object",
+          "required": true,
+          "content": {
+            "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/id"
+                "$ref": "#/components/schemas/minihubRequestPostBody"
               }
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "OK",
-              "schema": {
-                "$ref": "#/components/schemas/bookRequest"
-              }
-            },
-            "400": {
-              "description": "Failed. Misunderstood Request."
-            },
-            "404": {
-              "description": "Failed. Book request not found."
             }
           }
         },
-        "patch": {
-          "tags": [
-            "Mini Hubs"
-          ],
-          "summary": "Patch existing Mini Hubs (description, volume, connected_user_id)",
-          "requestBody": {
-            "description": "Mini Hub Patch Object",
-            "required": true,
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/minihubRequestPatchBody"
-                }
-              }
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/components/schemas/id"
             }
           },
-          "produces": [
-            "application/json"
-          ],
-          "responses": {
-            "201": {
-              "description": "OK",
-              "schema": {
-                "$ref": "#/components/schemas/id"
-              }
-            },
-            "400": {
-              "description": "Failed. Bad patch data."
-            },
-            "404": {
-              "description": "There is no MiniHub with the chosen ID."
-            }
-          }
-        },
-        "delete": {
-          "summary": "Delete Mini Hub Request by ID",
-          "tags": [
-            "Mini Hubs"
-          ],
-          "parameters": [
-            {
-              "in": "path",
-              "name": "id",
-              "required": true,
-              "description": "Mini Hub ID",
-              "schema": {
-                "$ref": "#/components/schemas/id"
-              }
-            }
-          ],
-          "responses": {
-            "204": {
-              "description": "OK",
-              "schema": {
-                "$ref": "#/components/schemas/id"
-              }
-            },
-            "400": {
-              "description": "Failed. Misunderstood Request."
-            },
-            "404": {
-              "description": "There is no Minihub with this ID."
-            }
+          "400": {
+            "description": "Failed. Bad post data."
           }
         }
       }
     },
-    "components": {
-      "schemas": {
-        "id": {
-          "properties": {
-            "uuid": {
-              "type": "string"
+    "/minihub/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "MiniHub ID",
+          "type": "string"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Mini Hubs"
+        ],
+        "summary": "Get Mini Hub request with given ID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "Mini Hub ID",
+            "schema": {
+              "$ref": "#/components/schemas/id"
             }
           }
-        },
-        "minihubRequestPostBody": {
-          "type": "object",
-          "properties": {
-            "description": {
-              "type": "string"
-            },
-            "connected_user_id": {
-              "type": "integer",
-              "nullable": true,
-              "format": "int32"
-            },
-            "volume": {
-              "type": "integer",
-              "format": "int32"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/components/schemas/minihubRequest"
             }
+          },
+          "400": {
+            "description": "Failed. Misunderstood Request."
+          },
+          "404": {
+            "description": "Failed. User with given ID not found."
           }
-        },
-        "minihubRequestPatchBody": {
-          "type": "object",
-          "properties": {
-            "action": {
-              "type": "string",
-              "enum": ["change_description", "change_volume", "change_connected_user"]
-            },
-            "description": {
-              "type": "string"
-            },
-            "volume": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "connected_user_id": {
-              "type": "integer"
-            }
-          }
-        },
-        "minihubRequest": {
-          "type": "object",
-          "properties": {
-            "description": {
-              "type": "string",
-              "format": "string"
-            },
-            "connected_user_id": {
-              "type": "integer"
-            },
-            "volume": {
-              "type": "integer"
-            }
-          }
-        },
-        "minihubsRequest": {
-          "type": "object",
-          "properties": {
-            "minihubRequest": {
-              "additionalProperties": {
-                "$ref": "#/components/schemas/minihubsRequest"
+        }
+      },
+      "patch": {
+        "tags": [
+          "Mini Hubs"
+        ],
+        "summary": "Patch existing Mini Hubs (description, volume, connected_user_id)",
+        "requestBody": {
+          "description": "Mini Hub Patch Object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/minihubRequestPatchBody"
               }
+            }
+          }
+        },
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/components/schemas/id"
+            }
+          },
+          "400": {
+            "description": "Failed. Bad patch data."
+          },
+          "404": {
+            "description": "There is no MiniHub with the chosen ID."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Mini Hub Request by ID",
+        "tags": [
+          "Mini Hubs"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "Mini Hub ID",
+            "schema": {
+              "$ref": "#/components/schemas/id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/components/schemas/id"
+            }
+          },
+          "400": {
+            "description": "Failed. Misunderstood Request."
+          },
+          "404": {
+            "description": "There is no Minihub with this ID."
+          }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Returns a list of all connected users",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/components/schemas/usersRequest"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Add a new User",
+        "requestBody": {
+          "description": "User Post Object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/userPostRequestBody"
+              }
+            }
+          }
+        },
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/components/schemas/id"
+            }
+          },
+          "400": {
+            "description": "Failed. Bad post data."
+          }
+        }
+      }
+    },
+    "/user/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "User ID",
+          "type": "string"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get User request with given ID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "User ID",
+            "schema": {
+              "$ref": "#/components/schemas/id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/components/schemas/minihubRequest"
+            }
+          },
+          "400": {
+            "description": "Failed. Misunderstood Request."
+          },
+          "404": {
+            "description": "Failed. Book request not found."
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Patch existing Users (room, output, connect_to_minihub)",
+        "requestBody": {
+          "description": "User Patch Object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/userRequestPatchBody"
+              }
+            }
+          }
+        },
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/components/schemas/id"
+            }
+          },
+          "400": {
+            "description": "Failed. Bad patch data."
+          },
+          "404": {
+            "description": "For more informatin, read the shown message."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete User Request by ID",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "User ID",
+            "schema": {
+              "$ref": "#/components/schemas/id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/components/schemas/id"
+            }
+          },
+          "400": {
+            "description": "Failed. Misunderstood Request."
+          },
+          "404": {
+            "description": "There is no User with this ID."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "id": {
+        "properties": {
+          "uuid": {
+            "type": "string"
+          }
+        }
+      },
+      "minihubRequestPostBody": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "connected_user_id": {
+            "type": "integer",
+            "nullable": true,
+            "format": "int32"
+          },
+          "volume": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "userPostRequestBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "output": {
+            "type": "string"
+          },
+          "room": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "minihubRequestPatchBody": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": ["change_description", "change_volume", "change_connected_user"]
+          },
+          "description": {
+            "type": "string"
+          },
+          "volume": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "connected_user_id": {
+            "type": "integer"
+          }
+        }
+      },
+      "userRequestPatchBody": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": ["change_room", "change_output", "connect_to_minihub", "disconnect_from_minihub"]
+          },
+          "output": {
+            "type": "string"
+          },
+          "room": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "minihub_id": {
+            "type": "integer"
+          }
+        }
+      },
+      "minihubRequest": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "format": "string"
+          },
+          "connected_user_id": {
+            "type": "integer"
+          },
+          "volume": {
+            "type": "integer"
+          }
+        }
+      },
+      "minihubsRequest": {
+        "type": "object",
+        "properties": {
+          "minihubRequest": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/minihubsRequest"
+            }
+          }
+        }
+      },
+      "usersRequest": {
+        "type": "object",
+        "properties": {
+          "minihubRequest": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/usersRequest"
             }
           }
         }
       }
     }
   }
+}

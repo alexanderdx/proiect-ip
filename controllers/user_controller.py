@@ -21,10 +21,19 @@ def get_users():
     return {'users': output_users}
 
 
+@bp.route('/user/<id>', methods=['GET'])
+def get_user_by_id(id):
+    user = User.query.get_or_404(id)
+
+    user_data = get_user_data(user)
+
+    return user_data
+
+
 @bp.route('/user', methods=['POST'])
 def add_user():
     user = User(name=request.json['name'], output=request.json['output'], room=request.json['room'])
-    
+
     db.session.add(user)
     db.session.commit()
     return get_user_data(user)
@@ -33,6 +42,7 @@ def add_user():
 @bp.route('/user/<id>', methods=['PATCH'])
 def update_user(id):
     user = User.query.get(id)
+
     if user is None:
         return {"error": "User not found."}, 404
 
@@ -89,6 +99,7 @@ def delete_user(id):
 
 def get_user_data(user):
     connected_minihub = MiniHub.query.filter(MiniHub.connected_user_id == user.id).first()
+    
     return {
         'id': user.id,
         'name': user.name,
