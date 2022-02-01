@@ -18,8 +18,7 @@ def get_minihubs():
     minihubs = MiniHub.query.all()
     output_minihubs = []
     for minihub in minihubs:
-        minihub_data = {'id': minihub.id, 'description': minihub.description, 'connected_user_id': minihub.connected_user_id,
-                        'connected_user': minihub.connected_user.name if minihub.connected_user is not None else None, 'volume': minihub.volume}
+        minihub_data = get_minihub_data(minihub)
         output_minihubs.append(minihub_data)
 
     return {'minihubs': output_minihubs}
@@ -28,12 +27,12 @@ def get_minihubs():
 @bp.route('/minihub', methods=['POST'])
 def add_minihub():
     minihub = MiniHub(description=request.json['description'],
-                      connected_user_id=request.json['connected_user_id'], volume=request.json['volume'],
+                      volume=request.json['volume'],
                       port=request.json['port'])
 
     db.session.add(minihub)
     db.session.commit()
-    return {'id': minihub.id, 'description': minihub.description, 'connected_user_id': minihub.connected_user_id, 'volume': minihub.volume}
+    return get_minihub_data(minihub)
 
 
 @bp.route('/minihub/<id>', methods=['PATCH'])
@@ -71,11 +70,7 @@ def update_minihub(id):
         return json.dumps({'message': 'Invalid command'}), 403
 
     db.session.commit()
-    return {'id': minihub.id,
-            'description': minihub.description,
-            'connected_user_id': minihub.connected_user_id,
-            'connected_user': minihub.connected_user.name if minihub.connected_user is not None else None,
-            'volume': minihub.volume}
+    return get_minihub_data(minihub)
 
 
 @bp.route('/minihub/<id>', methods=['DELETE'])
@@ -84,9 +79,18 @@ def delete_minihub(id):
     if minihub is None:
         return {"error": "MiniHub not found."}, 404
 
-    os.system (f"echo Killing minihub on {app.config['MINIHUBS_NETWORK']}:{minihub.port}")
-    os.system (f"kill {minihub.pid} &")
+    os.system(f"echo Killing minihub on {app.config['MINIHUBS_NETWORK']}:{minihub.port}")
+    os.system(f"kill {minihub.pid} &")
 
     db.session.delete(minihub)
     db.session.commit()
     return {"message": "Minihub deleted successfully."}
+
+
+def get_minihub_data(minihub):
+    return {'id': minihub.id,
+            'description': minihub.description,
+            'connected_user_id': minihub.connected_user_id,
+            'connected_user': minihub.connected_user.name if minihub.connected_user is not None else None,
+            'volume': minihub.volume,
+            'port': minihub.port}
