@@ -31,18 +31,6 @@ def add_minihub():
                       connected_user_id=request.json['connected_user_id'], volume=request.json['volume'],
                       port=request.json['port'])
 
-    os.system (f"echo Starting minihub on {app.config['MINIHUBS_NETWORK']}:{minihub.port}")
-    os.system (f"cd minihub_server && flask run --port={minihub.port} &")
-    result = subprocess.run(['echo', '$!'], stdout=subprocess.PIPE)
-    minihub.pid = result.stdout
-
-    time.sleep (3)
-
-    url = f"http://{app.config['MINIHUBS_NETWORK']}:{minihub.port}/media_player"
-    payload = json.dumps ({'title': minihub.description})
-    headers = {"Content-Type": "application/json"}
-    response = requests.post(url, data = payload, headers = headers)
-
     db.session.add(minihub)
     db.session.commit()
     return {'id': minihub.id, 'description': minihub.description, 'connected_user_id': minihub.connected_user_id, 'volume': minihub.volume}
