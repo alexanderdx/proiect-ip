@@ -42,6 +42,18 @@ def add_user ():
     }
 
 
+@bp.route('/user/<id>', methods=['GET'])
+def get_user_by_id(id):
+    user = User.query.get_or_404(id)
+
+    connected_minihub = MiniHub.query.filter(MiniHub.connected_user_id == user.id).first()
+    user_data = {'id': user.id, 'name': user.name,
+                'output': user.output, 'room': user.room,
+                'connected_to': "MiniHub {}".format(connected_minihub.id) if connected_minihub is not None else None}
+
+    return user_data
+
+
 @bp.route ('/user/<id>', methods = ['PATCH'])
 def update_user (id):
     user = User.query.get (id)
