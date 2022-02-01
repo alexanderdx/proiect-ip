@@ -4,7 +4,7 @@ from flask import request
 from flask import Blueprint
 
 from app import db
-from models import User
+from models import MiniHub, User
 
 bp = Blueprint('user', __name__)
 
@@ -36,15 +36,38 @@ def update_user(id):
     request_data = request.get_json()
     action = request_data['action']
 
+    message = None
+
     if action == 'change_room':
         user.room = request_data['room']
     elif action == 'change_output':
         user.output = request_data['output']
+    elif action == 'connect_to_minihub':
+        minihub_id = request_data['minihub_id']
+        minihub = MiniHub.query.get(minihub_id)
+
+        if minihub is None:
+            message = 'MiniHub does not exist!'
+        elif minihub.connected_user is not None:
+            message = 'Someone is already connected to the MiniHub!'
+        else:
+            minihub.connected_user = user
+            minihub.connected_user_id = user.id
+            message = 'Successfully connected to the MiniHub!'
+    elif action == 'disconnect_from_minihub':
+        minihub = MiniHub.query.filter(MiniHub.connected_user_id == user.id).first()
+
+        if minihub is None:
+            message = "You're not connected to any MiniHub!"
+        else:
+            minihub.connected_user = None
+            minihub.connected_user_id = None
+            message = "Successfully disconnected from MiniHub!"
     else:
-        return json.dumps ({'message': 'invalid command'})
+        return json.dumps ({'message': 'Invalid command'})
 
     db.session.commit()
-    return {'id': user.id, 'name': user.name, 'output': user.output, 'room': user.room}
+    return {'message': message, 'id': user.id, 'name': user.name, 'output': user.output, 'room': user.room}
 
 
 @bp.route('/user/<id>', methods=['DELETE'])

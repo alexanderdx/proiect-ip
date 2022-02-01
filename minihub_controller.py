@@ -4,7 +4,7 @@ from flask import request
 from flask import Blueprint
 
 from app import db
-from models import MiniHub
+from models import MiniHub, User
 
 bp = Blueprint('minihub', __name__)
 
@@ -14,8 +14,8 @@ def get_minihubs():
     minihubs = MiniHub.query.all()
     output_minihubs = []
     for minihub in minihubs:
-        minihub_data = {'id': minihub.id, 'description': minihub.description,
-                        'connected_user_id': minihub.connected_user_id, 'volume': minihub.volume}
+        minihub_data = {'id': minihub.id, 'description': minihub.description, 'connected_user_id': minihub.connected_user_id,
+                        'connected_user': minihub.connected_user.name if minihub.connected_user is not None else None, 'volume': minihub.volume}
         output_minihubs.append(minihub_data)
 
     return {'minihubs': output_minihubs}
@@ -41,12 +41,28 @@ def update_minihub(id):
     elif action == 'change_volume':
         minihub.volume = request_data['volume']
     elif action == 'change_connected_user':
+        user = User.query.get(minihub.connected_user_id)
+
+        if user is None:
+            return json.dumps({'message': 'User does not exist!'})
+
         minihub.connected_user_id = request_data['connected_user_id']
+        minihub.connected_user = user
+    elif action == 'disconnect_user':
+        if minihub.connected_user is None:
+            return json.dumps({'message': 'No user is currently connected!'})
+
+        minihub.connected_user_id = None
+        minihub.connected_user = None
     else:
-        return json.dumps ({'message': 'invalid command'})
+        return json.dumps({'message': 'invalid command'})
 
     db.session.commit()
-    return {'id': minihub.id, 'description': minihub.description, 'connected_user_id': minihub.connected_user_id, 'volume': minihub.volume}
+    return {'id': minihub.id,
+            'description': minihub.description,
+            'connected_user_id': minihub.connected_user_id,
+            'connected_user': minihub.connected_user.name if minihub.connected_user is not None else None,
+            'volume': minihub.volume}
 
 
 @bp.route('/minihub/<id>', methods=['DELETE'])
