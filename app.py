@@ -26,11 +26,13 @@ def create_app(testing=False):
     import user_controller
     import media_controller
     import minihub_controller
+    import swagger_controller
 
     app.register_blueprint(hub_controller.bp)
     app.register_blueprint(user_controller.bp)
     app.register_blueprint(media_controller.bp)
     app.register_blueprint(minihub_controller.bp)
+    app.register_blueprint(swagger_controller.SWAGGERUI_BLUEPRINT)
 
     @app.route('/')
     def hello_world():
