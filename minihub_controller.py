@@ -39,6 +39,13 @@ def update_minihub(id):
     if action == 'change_description':
         minihub.description = request_data['description']
     elif action == 'change_volume':
+        try:
+            volume = int(request_data['volume'])
+            if volume < 0 or volume > 100:
+                return json.dumps({'message': 'Invalid volume specified!'})
+        except ValueError:
+            return json.dumps({'message': 'Invalid volume specified!'})
+
         minihub.volume = request_data['volume']
     elif action == 'change_connected_user':
         user = User.query.get(minihub.connected_user_id)
