@@ -9,12 +9,12 @@ from flask_sqlalchemy import SQLAlchemy
 
 from classes.media_player import media_player
 
-app = Flask(__name__, instance_relative_config=True)
-mp = None
+app = Flask (__name__, instance_relative_config=True)
+mp  = None
 print ("Minihub started successfully")
 
 
-@app.route('/media_player', methods=['POST'])
+@app.route ('/media_player', methods = ['POST'])
 def create ():
     global mp
 
@@ -29,7 +29,7 @@ def create ():
     return json.dumps ({'message': 'player created'})
 
 
-@app.route('/media_player', methods=['PATCH'])
+@app.route ('/media_player', methods = ['PATCH'])
 def update ():
     global mp
     
@@ -37,7 +37,7 @@ def update ():
     command      = request_data['command']
     if command == 'set_media':
         query = request_data['query']
-        mp.set_media (mp.search (str(query)))
+        mp.set_media (mp.search (str (query)))
     elif command == 'play':
         mp.play ()
     elif command == 'pause':
@@ -58,7 +58,7 @@ def update ():
     return json.dumps ({'message': 'command executed succesfully'})
 
 
-@app.route('/media_player', methods=['DELETE'])
+@app.route ('/media_player', methods = ['DELETE'])
 def destroy ():
     global mp
     
@@ -67,7 +67,7 @@ def destroy ():
     return json.dumps ({'message': 'player destroyed'})
 
 
-@app.route('/media_player', methods=['GET'])
+@app.route ('/media_player', methods = ['GET'])
 def index ():
     global mp
     
