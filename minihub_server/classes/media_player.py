@@ -20,18 +20,18 @@ class media_player:
             best  = pafy.new (source).getbest ()
             media = self.vlc_instance.media_new (best.url)
             
-            self.player.set_media(media)
-            self.player.play()
+            self.player.set_media (media)
+            self.player.play ()
         else:
-            media = self.vlc_instance.media_new(source)
-            self.player.set_media(media)
-            self.player.play()
+            media = self.vlc_instance.media_new (source)
+            self.player.set_media (media)
+            self.player.play ()
 
 
     def search (self, query):
         videosSearch = VideosSearch (query, limit = 1)
 
-        return videosSearch.result()['result'][0]['link']
+        return videosSearch.result ()['result'][0]['link']
 
     
     def pause (self):
