@@ -1,3 +1,4 @@
+from hashlib import new
 import json
 import requests as req
 from requests.structures import CaseInsensitiveDict
@@ -81,39 +82,53 @@ def update_user(id):
     action = request_data['action']
 
     if action == 'change_room':
-        old_minihub = MiniHub.query.get(user.room)
-        old_minihub.connected_user_id = None
-        # old_minihub.connected_user = None
-        old_time = get_data(old_minihub, json.dumps(get_time_payload))
-        old_volume = get_data(old_minihub, json.dumps(get_volume_payload))
+        old_time = 0
+        old_volume = 100
 
-        user.room = request_data['room']
-        new_minihub = MiniHub.query.get(user.room)
-        if new_minihub.connected_user_id == None or new_minihub.connected_user_id == 0:
-            new_minihub.connected_user_id = user.id
-            new_minihub.connected_user = user
-            # payload = json.dumps({
-            #     "command" : "pause",
-            #     })
-            # change_data(old_minihub, payload)
+        new_room = request_data['room']
+        if user.room == new_room:
+            return json.dumps({'message': 'The user is already in that room.'}), 200
+
+        if(user.room != 0):
+            old_minihub = MiniHub.query.get(user.room)
+            old_minihub.connected_user_id = None
+            old_minihub.connected_user = None
+            old_time =  get_data(old_minihub, json.dumps(get_time_payload))
+            old_time = old_time.json()["time"]
+            old_volume = get_data(old_minihub, json.dumps(get_volume_payload))
+            old_volume = old_volume.json()["volume"]
+
             payload = json.dumps({
-                "command" : "set_media", 
-                "query": f"{user.output}",
+                "command" : "pause",
                 })
-            change_data(new_minihub, payload)
-            time.sleep(3)
-            payload = json.dumps({
-                "command" : "set_time", 
-                "time": f"{old_time}",
-                })
-            change_data(new_minihub, payload)
-            payload = json.dumps({
-                "command" : "set_volume", 
-                "volume": f"{old_volume}",
-                })
-            change_data(new_minihub, payload)
-        db.session.commit()
-            
+            change_data(old_minihub, payload)
+            db.session.commit()
+
+
+        user.room = new_room
+        if user.room != 0:
+            new_minihub = MiniHub.query.get(user.room)
+            if (new_minihub.connected_user_id == None or new_minihub.connected_user_id == 0) and new_minihub.connected_user_id != user.id:
+                new_minihub.connected_user_id = user.id
+                new_minihub.connected_user = user
+                payload = json.dumps({
+                    "command" : "set_media", 
+                    "query": f"{user.output}",
+                    })
+                change_data(new_minihub, payload)
+                time.sleep(3)
+                payload = json.dumps({
+                    "command" : "set_time", 
+                    "time": old_time,
+                    })
+                change_data(new_minihub, payload)
+                payload = json.dumps({
+                    "command" : "set_volume", 
+                    "volume": old_volume,
+                    })
+                change_data(new_minihub, payload)
+                db.session.commit()
+                
 
 
     elif action == 'change_output':

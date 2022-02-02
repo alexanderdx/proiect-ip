@@ -27,6 +27,7 @@ def create_app (testing = False):
         app.config['TESTING'] = True
 
     db = SQLAlchemy (app)
+    # db.session.no_autoflush
 
     import database.models as models
     db.create_all ()
