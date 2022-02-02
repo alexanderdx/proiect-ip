@@ -53,6 +53,9 @@ def update ():
     elif command == 'set_time':
         time = request_data ['time']
         mp.set_time (int (time))
+    elif command == 'set_volume':
+        volume = request_data ['volume']
+        mp.volume_absolut (int (volume))
     else:
         return json.dumps ({'message': 'wrong command'})
     return json.dumps ({'message': 'command executed succesfully'})
