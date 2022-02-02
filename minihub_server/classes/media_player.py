@@ -66,3 +66,6 @@ class media_player:
 
     def set_time (self, time):
         self.player.set_time (time) 
+
+    def get_volume (self):
+        return self.player.audio_get_volume ()

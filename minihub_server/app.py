@@ -75,5 +75,7 @@ def index ():
     command      = request_data['command']
     if command == 'get_time':
         return json.dumps ({'time': mp.get_time ()})
+    elif command == 'get_volume':
+        return json.dumps ({'volume': mp.get_volume ()})
     else:
         return json.dumps ({'message': 'wrong command'})
