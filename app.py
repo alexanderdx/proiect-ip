@@ -3,6 +3,8 @@ import subprocess
 import time
 import requests
 import json
+import atexit
+import platform
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -44,6 +46,7 @@ def create_app (testing = False):
     def hello_world ():
         return 'Hello World!'
 
+    atexit.register(close_minihubs)
     launch_minihubs ()
 
     return app
@@ -69,6 +72,13 @@ def launch_minihubs ():
         response = requests.post(url, data = payload, headers = headers)
 
     db.session.commit ()
+
+
+def close_minihubs ():
+    if platform.system () in ['Linux', 'Darwin']:
+        os.system ('pkill flask')
+    else:
+        os.system ('taskkill /F /IM flask.exe /T')
 
 
 if __name__ == '__main__':
