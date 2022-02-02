@@ -1,10 +1,41 @@
 import json
+import requests as req
+from requests.structures import CaseInsensitiveDict
+import time
 
 from flask import request
 from flask import Blueprint
 
 from app import db
 from database.models import MiniHub, User
+
+
+def change_data(minihub, payload):
+    url = "http://localhost"
+    headers = CaseInsensitiveDict()
+    headers["Content-Type"] = "application/json"
+    response = req.patch(f"{url}:{minihub.port}/media_player", headers=headers, data=payload)
+    print(response)
+
+def get_data(minihub, payload):
+    url = "http://localhost"
+    headers = CaseInsensitiveDict()
+    headers["Content-Type"] = "application/json"
+    response = req.get(f"{url}:{minihub.port}/media_player", headers=headers, data=payload)
+    return response
+
+
+get_volume_payload = {
+    "command" : "get_volume"
+}
+
+get_time_payload = {
+    "command" : "get_time"
+}
+
+
+
+
 
 
 bp = Blueprint('user', __name__)
@@ -50,7 +81,41 @@ def update_user(id):
     action = request_data['action']
 
     if action == 'change_room':
+        old_minihub = MiniHub.query.get(user.room)
+        old_minihub.connected_user_id = None
+        # old_minihub.connected_user = None
+        old_time = get_data(old_minihub, json.dumps(get_time_payload))
+        old_volume = get_data(old_minihub, json.dumps(get_volume_payload))
+
         user.room = request_data['room']
+        new_minihub = MiniHub.query.get(user.room)
+        if new_minihub.connected_user_id == None or new_minihub.connected_user_id == 0:
+            new_minihub.connected_user_id = user.id
+            new_minihub.connected_user = user
+            # payload = json.dumps({
+            #     "command" : "pause",
+            #     })
+            # change_data(old_minihub, payload)
+            payload = json.dumps({
+                "command" : "set_media", 
+                "query": f"{user.output}",
+                })
+            change_data(new_minihub, payload)
+            time.sleep(3)
+            payload = json.dumps({
+                "command" : "set_time", 
+                "time": f"{old_time}",
+                })
+            change_data(new_minihub, payload)
+            payload = json.dumps({
+                "command" : "set_volume", 
+                "volume": f"{old_volume}",
+                })
+            change_data(new_minihub, payload)
+        db.session.commit()
+            
+
+
     elif action == 'change_output':
         user.output = request_data['output']
     elif action == 'connect_to_minihub':

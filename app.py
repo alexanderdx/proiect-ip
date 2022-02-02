@@ -46,8 +46,8 @@ def create_app (testing = False):
     def hello_world ():
         return 'Hello World!'
 
-    atexit.register(close_minihubs)
-    launch_minihubs ()
+    # atexit.register(close_minihubs)
+    # launch_minihubs ()
 
     return app
 
