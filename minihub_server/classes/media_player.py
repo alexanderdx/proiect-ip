@@ -35,11 +35,13 @@ class media_player:
 
     
     def pause (self):
-        self.player.pause ()
+        if self.player.is_playing():
+            self.player.pause ()
 
     
     def play (self):
-        self.player.play ()
+        if not self.player.is_playing():
+            self.player.play ()
 
     def volume_up (self):
         self.volume += 10
