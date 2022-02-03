@@ -117,25 +117,28 @@ def update_user(id):
             return json.dumps({'message': 'No MiniHub exists in that room.'}), 403
 
         if new_minihub.connected_user is None:
-            # No one is using the new minihub, we can disconnect from the old one
-            current_minihub.connected_user_id = None
-            current_minihub.connected_user = None
-            # And clear its player
-            payload = json.dumps({
-                "command": "stop",
-            })
-            change_data(current_minihub, payload)
+            # No one is using the new minihub, we can disconnect from the old one (if it exists)
+            if current_minihub is not None:
+                current_minihub.connected_user_id = None
+                current_minihub.connected_user = None
+
+                # And clear its player
+                payload = json.dumps({
+                    "command": "stop",
+                })
+                change_data(current_minihub, payload)
 
             # Connect to the new one
             new_minihub.connected_user_id = user.id
             new_minihub.connected_user = user
 
             # Resume with our media, timestamp and volume
-            payload = json.dumps({
-                "command": "set_media",
-                "query": f"{user.playing}",
-            })
-            change_data(new_minihub, payload)
+            if user.playing is not None:
+                payload = json.dumps({
+                    "command": "set_media",
+                    "query": f"{user.playing}",
+                })
+                change_data(new_minihub, payload)
 
             payload = json.dumps({
                 "command": "set_time",
