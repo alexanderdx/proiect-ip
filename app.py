@@ -1,18 +1,17 @@
 import os
-import subprocess
 import time
 import requests
 import json
 import atexit
-import platform
+import multiprocessing
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-
 app = None
 db  = None
 
+minihub_process_pool = {}
 
 def create_app (testing = False):
     global app, db
@@ -27,6 +26,7 @@ def create_app (testing = False):
         app.config['TESTING'] = True
 
     db = SQLAlchemy (app)
+    # db.session.no_autoflush
 
     import database.models as models
     db.create_all ()
@@ -46,39 +46,54 @@ def create_app (testing = False):
     def hello_world ():
         return 'Hello World!'
 
-    # atexit.register(close_minihubs)
-    # launch_minihubs ()
+    atexit.register(close_minihubs)
 
+    if testing == False:
+        launch_minihubs ()
+    
     return app
 
+def start_minihub_process(minihub):
+    global app, minihub_process_pool
+
+    t = multiprocessing.Process(target=minihub_process, name=f'minihub-{minihub.port}', args=(app.config['MINIHUBS_NETWORK'], minihub.port,))
+    minihub_process_pool[minihub.id] = t
+    minihub_process_pool[minihub.id].daemon = True
+    minihub_process_pool[minihub.id].start()
+
+def minihub_process(network_path, port):
+    os.system (f"echo Starting minihub on {network_path}:{port} with PID {multiprocessing.current_process().pid}")
+    os.system (f"cd minihub_server && flask run --port={port} &")
+
+def start_blank_media_player(minihub):
+    global app
+
+    url = f"http://{app.config['MINIHUBS_NETWORK']}:{minihub.port}/media_player"
+    payload = json.dumps ({'title': minihub.description})
+    headers = {"Content-Type": "application/json"}
+    response = requests.post(url, data = payload, headers = headers)
 
 def launch_minihubs ():
-    global app, db
+    global app, db, minihub_process_pool
     from database.models import MiniHub
 
     minihubs = MiniHub.query.all ()
-
     for minihub in minihubs:
-        os.system (f"echo Starting minihub on {app.config['MINIHUBS_NETWORK']}:{minihub.port}")
-        os.system (f"cd minihub_server && flask run --port={minihub.port} &")
-        result = subprocess.run (['echo', '$!'], stdout = subprocess.PIPE)
-        minihub.pid = result.stdout
-
-        time.sleep (3)
-
-        url = f"http://{app.config['MINIHUBS_NETWORK']}:{minihub.port}/media_player"
-        payload = json.dumps ({'title': minihub.description})
-        headers = {"Content-Type": "application/json"}
-        response = requests.post(url, data = payload, headers = headers)
-
-    db.session.commit ()
+        start_minihub_process(minihub)
+        time.sleep(1.0)
+        start_blank_media_player(minihub)
 
 
-def close_minihubs ():
-    if platform.system () in ['Linux', 'Darwin']:
-        os.system ('pkill flask')
-    else:
-        os.system ('taskkill /F /IM flask.exe /T')
+def close_minihubs():
+    global minihub_process_pool
+
+    print("Terminating MiniHub processes...")
+    for proc in minihub_process_pool.values():
+        try:
+            proc.terminate()
+            proc.close()
+        except ValueError:
+            pass # process is already closed
 
 
 if __name__ == '__main__':

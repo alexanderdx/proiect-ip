@@ -1,13 +1,13 @@
 import json
-import os
-import subprocess
 import time
 import requests
 
 from flask import request
 from flask import Blueprint
+from sqlalchemy import exc
 
-from app import db, app
+from app import db, app, minihub_process_pool
+from app import start_minihub_process, start_blank_media_player
 from database.models import MiniHub, User
 
 bp = Blueprint('minihub', __name__)
@@ -27,11 +27,22 @@ def get_minihubs():
 @bp.route('/minihub', methods=['POST'])
 def add_minihub():
     minihub = MiniHub(description=request.json['description'],
-                      volume=request.json['volume'],
+                      volume=100 if 'volume' not in request.json else request.json['volume'],
                       port=request.json['port'])
+    
+    try:
+        db.session.add(minihub)
+        db.session.commit()
+    except exc.IntegrityError:
+        db.session.rollback()
+        return json.dumps({'message': 'Port already in use!'}), 403
 
-    db.session.add(minihub)
-    db.session.commit()
+    db.session.refresh(minihub) # Receive back the db auto-assigned id
+
+    start_minihub_process(minihub)
+    time.sleep(0.5)
+    if 'headless' not in request.json:
+        start_blank_media_player(minihub)
 
     return get_minihub_data(minihub)
 
@@ -44,15 +55,7 @@ def update_minihub(id):
 
     if action == 'change_description':
         minihub.description = request_data['description']
-    elif action == 'change_volume':
-        try:
-            volume = int(request_data['volume'])
-            if volume < 0 or volume > 100:
-                return json.dumps({'message': 'Invalid volume specified!'}), 403
-        except ValueError:
-            return json.dumps({'message': 'Invalid volume specified!'}), 403
 
-        minihub.volume = request_data['volume']
     elif action == 'change_connected_user':
         user = User.query.get(minihub.connected_user_id)
 
@@ -80,8 +83,20 @@ def delete_minihub(id):
     if minihub is None:
         return {"error": "MiniHub not found."}, 404
 
-    os.system(f"echo Killing minihub on {app.config['MINIHUBS_NETWORK']}:{minihub.port}")
-    os.system(f"kill {minihub.pid} &")
+    url = f"http://{app.config['MINIHUBS_NETWORK']}:{minihub.port}/media_player"
+    response = requests.delete(url)
+
+    if response.status_code != 200:
+        return {"error": "Failed to delete the MiniHub's media player."}, 500
+
+    try:
+        minihub_process_pool[minihub.id].terminate()
+        minihub_process_pool[minihub.id].close()
+        del minihub_process_pool[minihub.id]
+    except ValueError:
+        return {"message": "MiniHub already deleted."}, 200
+    except KeyError:
+        pass
 
     db.session.delete(minihub)
     db.session.commit()

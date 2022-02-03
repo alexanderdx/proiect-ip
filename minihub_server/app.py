@@ -1,15 +1,12 @@
-import os
 import json
-import subprocess
 
 from flask import request
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 
 
 from classes.media_player import media_player
 
-app = Flask (__name__, instance_relative_config=True)
+app = Flask ('minihub', instance_relative_config=True)
 mp  = None
 print ("Minihub started successfully")
 
@@ -42,6 +39,8 @@ def update ():
         mp.play ()
     elif command == 'pause':
         mp.pause ()
+    elif command == 'stop':
+        mp.set_media ('blank.mp4', is_youtube = False)
     elif command == 'mute':
         mp.mute ()
     elif command == 'unmute':
@@ -65,6 +64,9 @@ def update ():
 def destroy ():
     global mp
     
+    if mp is None:
+        return json.dumps ({'message': 'Player is already deleted!'})
+
     mp.close ()
     mp = None
     return json.dumps ({'message': 'player destroyed'})

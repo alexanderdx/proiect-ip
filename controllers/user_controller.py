@@ -1,7 +1,6 @@
 import json
 import requests as req
 from requests.structures import CaseInsensitiveDict
-import time
 
 from flask import request
 from flask import Blueprint
@@ -34,10 +33,6 @@ get_time_payload = {
 }
 
 
-
-
-
-
 bp = Blueprint('user', __name__)
 
 
@@ -63,7 +58,10 @@ def get_user_by_id(id):
 
 @bp.route('/user', methods=['POST'])
 def add_user():
-    user = User(name=request.json['name'], output=request.json['output'], room=request.json['room'])
+    user = User(name=request.json['name'],
+                room=request.json['room'],
+                volume=100,
+                timestamp=0)
 
     db.session.add(user)
     db.session.commit()
@@ -81,43 +79,207 @@ def update_user(id):
     action = request_data['action']
 
     if action == 'change_room':
-        old_minihub = MiniHub.query.get(user.room)
-        old_minihub.connected_user_id = None
-        # old_minihub.connected_user = None
-        old_time = get_data(old_minihub, json.dumps(get_time_payload))
-        old_volume = get_data(old_minihub, json.dumps(get_volume_payload))
+        new_room = request_data['room']
 
-        user.room = request_data['room']
-        new_minihub = MiniHub.query.get(user.room)
-        if new_minihub.connected_user_id == None or new_minihub.connected_user_id == 0:
+        if user.room == new_room:
+            return json.dumps({'message': 'The user is already in that room.'}), 200
+
+        if new_room is None:
+            return json.dumps({'message': 'Destination room must be specified.'}), 403
+        
+        user.room = new_room
+
+        db.session.commit()
+
+        current_minihub = MiniHub.query.filter(MiniHub.connected_user_id == user.id).first()
+        new_minihub = MiniHub.query.get(new_room)
+
+        if current_minihub is not None:
+            if current_minihub.id == new_room: # User is returning to his room
+                payload = json.dumps({
+                    "command": "play",
+                })
+                change_data(current_minihub, payload)
+                return json.dumps({'message': f'{user.name} returning to his room. Resuming...'}), 200
+
+            else: # User has left his room
+                # Save current timestamp and volume
+                user.timestamp = get_data(current_minihub, json.dumps(get_time_payload)).json()["time"]
+                user.volume = get_data(current_minihub, json.dumps(get_volume_payload)).json()["volume"]
+
+                # Pause the current minihub if the new one is taken
+                payload = json.dumps({
+                    "command": "pause",
+                })
+                change_data(current_minihub, payload)
+
+        if new_minihub is None:
+            return json.dumps({'message': 'No MiniHub exists in that room.'}), 200
+        elif new_minihub.connected_user is None:
+            # No one is using the new minihub, we can disconnect from the old one (if it exists)
+            if current_minihub is not None:
+                current_minihub.connected_user_id = None
+                current_minihub.connected_user = None
+
+                # And clear its player
+                payload = json.dumps({
+                    "command": "stop",
+                })
+                change_data(current_minihub, payload)
+
+            # Connect to the new one
             new_minihub.connected_user_id = user.id
             new_minihub.connected_user = user
-            # payload = json.dumps({
-            #     "command" : "pause",
-            #     })
-            # change_data(old_minihub, payload)
-            payload = json.dumps({
-                "command" : "set_media", 
-                "query": f"{user.output}",
+
+            # Resume with our media, timestamp and volume
+            if user.playing is not None:
+                payload = json.dumps({
+                    "command": "set_media",
+                    "query": f"{user.playing}",
                 })
-            change_data(new_minihub, payload)
-            time.sleep(3)
+                change_data(new_minihub, payload)
+
             payload = json.dumps({
-                "command" : "set_time", 
-                "time": f"{old_time}",
-                })
+                "command": "set_time",
+                "time": user.timestamp,
+            })
             change_data(new_minihub, payload)
+
             payload = json.dumps({
-                "command" : "set_volume", 
-                "volume": f"{old_volume}",
-                })
+                "command": "set_volume",
+                "volume": user.volume,
+            })
             change_data(new_minihub, payload)
+        else:
+            return json.dumps({'message': f'Going to room {new_room}. {new_minihub.connected_user.name} is connected to this room.'}), 200
+
         db.session.commit()
-            
 
+    elif action == 'play':
+        minihub = MiniHub.query.filter(MiniHub.connected_user_id == user.id).first()
 
-    elif action == 'change_output':
-        user.output = request_data['output']
+        if minihub is None:
+            return json.dumps({'message': "You're not connected to any MiniHub!"})
+        else:
+            if 'query' in request_data:
+                user.playing = request_data['query']
+                
+            payload = json.dumps({
+                "command": "set_media",
+                "query": f"{user.playing}",
+            })
+            change_data(minihub, payload)
+
+    elif action == 'pause':
+        minihub = MiniHub.query.filter(MiniHub.connected_user_id == user.id).first()
+
+        if minihub is None:
+            return json.dumps({'message': "You're not connected to any MiniHub!"})
+        else:
+            payload = json.dumps({
+                "command": "pause",
+            })
+            change_data(minihub, payload)
+
+    elif action == 'stop':
+        minihub = MiniHub.query.filter(MiniHub.connected_user_id == user.id).first()
+
+        if minihub is None:
+            return json.dumps({'message': "You're not connected to any MiniHub!"})
+        else:
+            payload = json.dumps({
+                "command": "stop",
+            })
+            change_data(minihub, payload)
+
+    elif action == 'resume':
+        minihub = MiniHub.query.filter(MiniHub.connected_user_id == user.id).first()
+
+        if minihub is None:
+            return json.dumps({'message': "You're not connected to any MiniHub!"})
+        else:
+            payload = json.dumps({
+                "command": "play",
+            })
+            change_data(minihub, payload)
+
+    elif action == 'mute':
+        minihub = MiniHub.query.filter(MiniHub.connected_user_id == user.id).first()
+
+        if minihub is None:
+            return json.dumps({'message': "You're not connected to any MiniHub!"})
+        else:
+            payload = json.dumps({
+                "command": "mute",
+            })
+            change_data(minihub, payload)
+
+    elif action == 'unmute':
+        minihub = MiniHub.query.filter(MiniHub.connected_user_id == user.id).first()
+
+        if minihub is None:
+            return json.dumps({'message': "You're not connected to any MiniHub!"})
+        else:
+            payload = json.dumps({
+                "command": "unmute",
+            })
+            change_data(minihub, payload)
+
+    elif action == 'vup':
+        minihub = MiniHub.query.filter(MiniHub.connected_user_id == user.id).first()
+
+        if minihub is None:
+            return json.dumps({'message': "You're not connected to any MiniHub!"})
+        else:
+            payload = json.dumps({
+                "command": "vup",
+            })
+            change_data(minihub, payload)
+
+    elif action == 'vdown':
+        minihub = MiniHub.query.filter(MiniHub.connected_user_id == user.id).first()
+
+        if minihub is None:
+            return json.dumps({'message': "You're not connected to any MiniHub!"})
+        else:
+            payload = json.dumps({
+                "command": "vdown",
+            })
+            change_data(minihub, payload)
+
+    elif action == 'set_time':
+        minihub = MiniHub.query.filter(MiniHub.connected_user_id == user.id).first()
+
+        if minihub is None:
+            return json.dumps({'message': "You're not connected to any MiniHub!"})
+        else:
+            payload = json.dumps({
+                "command": "set_time",
+                "time": request_data ['time']
+            })
+            change_data(minihub, payload)
+
+    elif action == 'set_volume':
+        minihub = MiniHub.query.filter(MiniHub.connected_user_id == user.id).first()
+
+        if minihub is None:
+            return json.dumps({'message': "You're not connected to any MiniHub!"})
+        else:
+            try:
+                volume = int(request_data['volume'])
+                if volume < 0 or volume > 100:
+                    return json.dumps({'message': 'Invalid volume specified!'}), 403
+            except ValueError:
+                return json.dumps({'message': 'Invalid volume specified!'}), 403
+
+            payload = json.dumps({
+                "command": "set_volume",
+                "volume": request_data['volume']
+            })
+            change_data(minihub, payload)
+            user.volume = volume
+            minihub.volume = volume
+
     elif action == 'connect_to_minihub':
         minihub_id = request_data['minihub_id']
         minihub = MiniHub.query.get(minihub_id)
@@ -127,9 +289,13 @@ def update_user(id):
         elif minihub.connected_user is not None:
             return json.dumps({'message': 'Someone is already connected to the MiniHub!'}), 403
         else:
+            current_minihub = MiniHub.query.filter(MiniHub.connected_user_id == user.id).first()
+            if current_minihub is not None:
+                return json.dumps({'message': f"You're already connected to MiniHub {current_minihub.id}! Please disconnect first and try again."})
+            
             minihub.connected_user = user
             minihub.connected_user_id = user.id
-
+            
             db.session.commit()
             return json.dumps({'message': 'Successfully connected to the MiniHub!'})
 
@@ -142,8 +308,14 @@ def update_user(id):
             minihub.connected_user = None
             minihub.connected_user_id = None
 
+            payload = json.dumps({
+                "command": "stop",
+            })
+            change_data(minihub, payload)
+
             db.session.commit()
             return json.dumps({'message': "Successfully disconnected from MiniHub!"})
+
     else:
         return json.dumps({'message': 'Invalid command'}), 403
 
@@ -168,7 +340,7 @@ def get_user_data(user):
     return {
         'id': user.id,
         'name': user.name,
-        'output': user.output,
+        'playing': user.playing,
         'room': user.room,
         'connected_to': "MiniHub {}".format(connected_minihub.id) if connected_minihub is not None else None
     }
