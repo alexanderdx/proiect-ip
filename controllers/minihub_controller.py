@@ -38,9 +38,11 @@ def add_minihub():
         return json.dumps({'message': 'Port already in use!'}), 403
 
     db.session.refresh(minihub) # Receive back the db auto-assigned id
+
     start_minihub_process(minihub)
     time.sleep(0.5)
-    start_blank_media_player(minihub)
+    if 'headless' not in request.json:
+        start_blank_media_player(minihub)
 
     return get_minihub_data(minihub)
 
@@ -89,11 +91,10 @@ def delete_minihub(id):
 
     try:
         minihub_process_pool[minihub.id].terminate()
-        time.sleep(0.1)
         minihub_process_pool[minihub.id].close()
         del minihub_process_pool[minihub.id]
     except ValueError:
-        return {"error": "Failed to delete MiniHub process."}, 500
+        return {"message": "MiniHub already deleted."}, 200
     except KeyError:
         pass
 

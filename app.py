@@ -47,7 +47,9 @@ def create_app (testing = False):
         return 'Hello World!'
 
     atexit.register(close_minihubs)
-    launch_minihubs ()
+
+    if testing == False:
+        launch_minihubs ()
     
     return app
 
@@ -87,8 +89,11 @@ def close_minihubs():
 
     print("Terminating MiniHub processes...")
     for proc in minihub_process_pool.values():
-        proc.terminate()
-        proc.close()
+        try:
+            proc.terminate()
+            proc.close()
+        except ValueError:
+            pass # process is already closed
 
 
 if __name__ == '__main__':

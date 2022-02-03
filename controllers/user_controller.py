@@ -114,9 +114,8 @@ def update_user(id):
                 change_data(current_minihub, payload)
 
         if new_minihub is None:
-            return json.dumps({'message': 'No MiniHub exists in that room.'}), 403
-
-        if new_minihub.connected_user is None:
+            return json.dumps({'message': 'No MiniHub exists in that room.'}), 200
+        elif new_minihub.connected_user is None:
             # No one is using the new minihub, we can disconnect from the old one (if it exists)
             if current_minihub is not None:
                 current_minihub.connected_user_id = None

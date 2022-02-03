@@ -48,7 +48,7 @@ def test_minihub_get(client):
     assert request.status_code == 200
 
 def test_minihub_post(client):
-    payload = {'description': 'Test description', 'connected_user_id': 0, 'volume': 55}
+    payload = {'description': 'Test description', 'headless': True, 'volume': 55, 'port': 5050}
     
     request = client.post('/minihub', json=payload, follow_redirects=True)
     
@@ -56,12 +56,12 @@ def test_minihub_post(client):
     
     assert request.status_code == 200
     assert payload['description'] == result['description']
-    assert payload['connected_user_id'] == result['connected_user_id']
+    assert payload['port'] == result['port']
     assert payload['volume'] == result['volume']
 
 def test_minihub_update_description(client):
     # Create a minihub
-    payload = {'description': 'Test description', 'connected_user_id': 0, 'volume': 55}
+    payload = {'description': 'Test description', 'headless': True, 'volume': 60, 'port': 5051}
     request = client.post('/minihub', json=payload, follow_redirects=True)
     hub_id = json.loads(request.data.decode())['id']
 
@@ -73,30 +73,18 @@ def test_minihub_update_description(client):
     assert request.status_code == 200
     assert payload['description'] == result['description']
 
-def test_minihub_update_volume(client):
-    # Create a minihub
-    payload = {'description': 'Test description', 'connected_user_id': 0, 'volume': 55}
-    request = client.post('/minihub', json=payload, follow_redirects=True)
-    hub_id = json.loads(request.data.decode())['id']
-
-    payload = {'action': 'change_volume', 'volume': 100}
-    request = client.patch('/minihub/{}'.format(hub_id), json=payload, follow_redirects=True)
-    
-    result = json.loads(request.data.decode())
-    
-    assert request.status_code == 200
-    assert payload['volume'] == result['volume']
 
 def test_minihub_deletion(client):
     # Create a minihub
-    payload = {'description': 'Test description', 'connected_user_id': 0, 'volume': 55}
+    payload = {'description': 'Test description', 'headless': True, 'volume': 60, 'port': 5053}
     request = client.post('/minihub', json=payload, follow_redirects=True)
     hub_id = json.loads(request.data.decode())['id']
 
-    payload = {'action': 'change_volume', 'volume': 100}
-    request = client.delete('/minihub/{}'.format(hub_id), json=payload, follow_redirects=True)
-    
+    request = client.delete('/minihub/{}'.format(hub_id), follow_redirects=True)
+    result = json.loads(request.data.decode())
+
     assert request.status_code == 200
+    assert result['message'] == "MiniHub already deleted."
 
 
 def test_user_get(client):
@@ -105,7 +93,7 @@ def test_user_get(client):
 
 
 def test_user_post(client):
-    payload = {'name': 'Jon Doe', 'output': 'Test output', 'room': 'Test room'}
+    payload = {'name': 'Jon Doe', 'room': 0}
 
     request = client.post('/user', json=payload, follow_redirects=True)
 
@@ -113,47 +101,46 @@ def test_user_post(client):
 
     assert request.status_code == 200
     assert payload['name'] == result['name']
-    assert payload['output'] == result['output']
     assert payload['room'] == result['room']
 
 
-def test_user_update_room(client):
+def test_user_change_room(client):
     # Create a user
-    payload = {'name': 'Alice Cooper', 'output': 'Test output', 'room': 'Test room'}
+    payload = {'name': 'Alice Cooper', 'room': 1}
     request = client.post('/user', json=payload, follow_redirects=True)
     user_id = json.loads(request.data.decode())['id']
 
-    payload = {'action': 'change_room', 'room': 'New room'}
+    payload = {'action': 'change_room', 'room': 12}
     request = client.patch('/user/{}'.format(user_id), json=payload, follow_redirects=True)
 
     result = json.loads(request.data.decode())
 
     assert request.status_code == 200
-    assert payload['room'] == result['room']
+    assert result['message'] == 'No MiniHub exists in that room.'
 
 
-def test_user_update_output(client):
+def test_user_play(client):
     # Create a user
-    payload = {'name': 'Karl Marx', 'output': 'Test output', 'room': 'Test room'}
+    payload = {'name': 'Karl Marx', 'playing': 'Soviet Anthem', 'room': 'Test room'}
     request = client.post('/user', json=payload, follow_redirects=True)
     user_id = json.loads(request.data.decode())['id']
 
-    payload = {'action': 'change_output', 'output': 'New output'}
+    payload = {'action': 'play', 'query': 'Britney Spears'}
     request = client.patch('/user/{}'.format(user_id), json=payload, follow_redirects=True)
 
     result = json.loads(request.data.decode())
 
     assert request.status_code == 200
-    assert payload['output'] == result['output']
+    assert result['message'] == "You're not connected to any MiniHub!"
 
 
 def test_user_deletion(client):
     # Create a user
-    payload = {'name': 'Stresu computers', 'output': 'Test output', 'room': 'Test room'}
+    payload = {'name': 'Stresu computers', 'playing': 'Test output', 'room': 'Test room'}
     request = client.post('/user', json=payload, follow_redirects=True)
     user_id = json.loads(request.data.decode())['id']
 
-    payload = {'action': 'change_output', 'output': 'New output'}
+    payload = {'action': 'change_output', 'playing': 'New output'}
     request = client.delete('/user/{}'.format(user_id), json=payload, follow_redirects=True)
 
     assert request.status_code == 200
