@@ -26,7 +26,7 @@ def get_minihubs():
 @bp.route('/minihub', methods=['POST'])
 def add_minihub():
     minihub = MiniHub(description=request.json['description'],
-                      volume=request.json['volume'],
+                      volume=100 if 'volume' not in request.json else request.json['volume'],
                       port=request.json['port'])
     
     db.session.add(minihub)
@@ -48,15 +48,7 @@ def update_minihub(id):
 
     if action == 'change_description':
         minihub.description = request_data['description']
-    elif action == 'change_volume':
-        try:
-            volume = int(request_data['volume'])
-            if volume < 0 or volume > 100:
-                return json.dumps({'message': 'Invalid volume specified!'}), 403
-        except ValueError:
-            return json.dumps({'message': 'Invalid volume specified!'}), 403
 
-        minihub.volume = request_data['volume']
     elif action == 'change_connected_user':
         user = User.query.get(minihub.connected_user_id)
 

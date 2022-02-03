@@ -15,7 +15,9 @@ class User(db.Model):
 
     id     = db.Column (db.Integer, primary_key = True)
     name   = db.Column (db.String (30), unique = True, nullable = False)
-    output = db.Column (db.String (100))
+    playing = db.Column (db.String (100))
+    timestamp = db.Column (db.Integer)
+    volume = db.Column (db.Integer)
     room   = db.Column (db.Integer)
 
 

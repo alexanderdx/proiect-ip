@@ -7,7 +7,7 @@ class media_player:
 
         options = ' '
         if title is not None:
-            title   = title.replace (' ', '_')
+            # title   = title.replace (' ', '_')
             options = f'--video-title {title}'
 
         self.vlc_instance = vlc.Instance (options)
@@ -43,13 +43,18 @@ class media_player:
         if not self.player.is_playing():
             self.player.play ()
 
+    def stop(self):
+        self.player.stop ()
+
     def volume_up (self):
-        self.volume += 10
-        self.player.audio_set_volume (self.volume)
+        if self.volume + 10 <= 100:
+            self.volume += 10
+            self.player.audio_set_volume (self.volume)
 
     def volume_down (self):
-        self.volume -= 10
-        self.player.audio_set_volume (self.volume)
+        if self.volume - 10 >= 0:
+            self.volume -= 10
+            self.player.audio_set_volume (self.volume)
 
     def volume_absolute (self, volume):
         self.player.audio_set_volume (volume)

@@ -1,10 +1,7 @@
-import os
 import json
-import subprocess
 
 from flask import request
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 
 
 from classes.media_player import media_player
@@ -42,6 +39,8 @@ def update ():
         mp.play ()
     elif command == 'pause':
         mp.pause ()
+    elif command == 'stop':
+        mp.set_media ('blank.mp4', is_youtube = False)
     elif command == 'mute':
         mp.mute ()
     elif command == 'unmute':
