@@ -78,37 +78,6 @@
           "type": "string"
         }
       ],
-      "get": {
-        "tags": [
-          "Mini Hubs"
-        ],
-        "summary": "Get Mini Hub request with given ID",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "description": "Mini Hub ID",
-            "schema": {
-              "$ref": "#/components/schemas/id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/components/schemas/minihubRequest"
-            }
-          },
-          "400": {
-            "description": "Failed. Misunderstood Request."
-          },
-          "404": {
-            "description": "Failed. User with given ID not found."
-          }
-        }
-      },
       "patch": {
         "tags": [
           "Mini Hubs"
@@ -345,9 +314,9 @@
           "description": {
             "type": "string"
           },
-          "connected_user_id": {
+          "port": {
             "type": "integer",
-            "nullable": true,
+            "nullable": false,
             "format": "int32"
           },
           "volume": {
@@ -376,12 +345,12 @@
         "properties": {
           "action": {
             "type": "string",
-            "enum": ["change_description", "change_volume", "change_connected_user"]
+            "enum": ["change_description", "change_connected_user", "disconnect_user"]
           },
           "description": {
             "type": "string"
           },
-          "volume": {
+          "disconnect_user": {
             "type": "integer",
             "format": "int32"
           },
@@ -395,7 +364,7 @@
         "properties": {
           "action": {
             "type": "string",
-            "enum": ["change_room", "change_output", "connect_to_minihub", "disconnect_from_minihub"]
+            "enum": ["change_room", "change_output", "connect_to_minihub", "disconnect_from_minihub", "play", "pause", "stop", "resume", "muted", "unmute", "vup", "vdown", "set_time","set_volume"]
           },
           "output": {
             "type": "string"
@@ -406,6 +375,14 @@
           },
           "minihub_id": {
             "type": "integer"
+          },
+          "volume": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "time": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
