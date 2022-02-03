@@ -79,7 +79,7 @@ def launch_minihubs ():
     minihubs = MiniHub.query.all ()
     for minihub in minihubs:
         start_minihub_process(minihub)
-        time.sleep(0.5)
+        time.sleep(1.0)
         start_blank_media_player(minihub)
 
 

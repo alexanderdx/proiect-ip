@@ -148,6 +148,8 @@ def update_user(id):
                 "volume": user.volume,
             })
             change_data(new_minihub, payload)
+        else:
+            return json.dumps({'message': f'{new_minihub.connected_user.name} is connected to this room.'}), 200
 
         db.session.commit()
 
@@ -157,7 +159,7 @@ def update_user(id):
         if minihub is None:
             return json.dumps({'message': "You're not connected to any MiniHub!"})
         else:
-            if 'query' in user.playing:
+            if 'query' in request_data:
                 user.playing = request_data['query']
                 
             payload = json.dumps({
@@ -285,7 +287,7 @@ def update_user(id):
         elif minihub.connected_user is not None:
             return json.dumps({'message': 'Someone is already connected to the MiniHub!'}), 403
         else:
-            current_minihub = minihub = MiniHub.query.filter(MiniHub.connected_user_id == user.id).first()
+            current_minihub = MiniHub.query.filter(MiniHub.connected_user_id == user.id).first()
             if current_minihub is not None:
                 return json.dumps({'message': f"You're already connected to MiniHub {current_minihub.id}! Please disconnect first and try again."})
             
