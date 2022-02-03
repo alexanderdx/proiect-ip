@@ -100,7 +100,7 @@ def update_user(id):
                     "command": "play",
                 })
                 change_data(current_minihub, payload)
-                return json.dumps({'message': 'User returning to his room. Resuming...'}), 200
+                return json.dumps({'message': f'{user.name} returning to his room. Resuming...'}), 200
 
             else: # User has left his room
                 # Save current timestamp and volume
@@ -149,7 +149,7 @@ def update_user(id):
             })
             change_data(new_minihub, payload)
         else:
-            return json.dumps({'message': f'{new_minihub.connected_user.name} is connected to this room.'}), 200
+            return json.dumps({'message': f'Going to room {new_room}. {new_minihub.connected_user.name} is connected to this room.'}), 200
 
         db.session.commit()
 

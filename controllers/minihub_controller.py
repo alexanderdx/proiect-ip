@@ -4,6 +4,7 @@ import requests
 
 from flask import request
 from flask import Blueprint
+from sqlalchemy import exc
 
 from app import db, app, minihub_process_pool
 from app import start_minihub_process, start_blank_media_player
@@ -29,10 +30,14 @@ def add_minihub():
                       volume=100 if 'volume' not in request.json else request.json['volume'],
                       port=request.json['port'])
     
-    db.session.add(minihub)
-    db.session.commit()
-    db.session.refresh(minihub) # Receive back the db auto-assigned id
+    try:
+        db.session.add(minihub)
+        db.session.commit()
+    except exc.IntegrityError:
+        db.session.rollback()
+        return json.dumps({'message': 'Port already in use!'}), 403
 
+    db.session.refresh(minihub) # Receive back the db auto-assigned id
     start_minihub_process(minihub)
     time.sleep(0.5)
     start_blank_media_player(minihub)
