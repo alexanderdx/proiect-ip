@@ -9,7 +9,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 from classes.media_player import media_player
 
-app = Flask (__name__, instance_relative_config=True)
+app = Flask ('minihub', instance_relative_config=True)
 mp  = None
 print ("Minihub started successfully")
 
@@ -65,6 +65,9 @@ def update ():
 def destroy ():
     global mp
     
+    if mp is None:
+        return json.dumps ({'message': 'Player is already deleted!'})
+
     mp.close ()
     mp = None
     return json.dumps ({'message': 'player destroyed'})
