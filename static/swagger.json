@@ -12,7 +12,7 @@
   "tags": [
     {
       "name": "Smart Sound System API",
-      "description": "This bit needs work: An API made to simulate a smart sound system ment to be used in homes with multiple rooms."
+      "description": "An API for a smart audio system meant to be used an entire house."
     }
   ],
   "servers": [
